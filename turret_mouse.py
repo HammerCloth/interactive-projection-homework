@@ -3,7 +3,7 @@ import sys
 import math
 import pygame as pg
 
-
+TURRET=None
 CAPTION = "Tank Turret: Mouse"
 SCREEN_SIZE = (500, 500)
 BACKGROUND_COLOR = (50, 50, 50)
@@ -130,7 +130,8 @@ class Control(object):
             self.display_fps()
 
 
-if __name__ == "__main__":
+def run():
+    global TURRET
     os.environ['SDL_VIDEO_CENTERED'] = '1'
     pg.init()
     pg.display.set_caption(CAPTION)
@@ -141,3 +142,5 @@ if __name__ == "__main__":
     run_it.main_loop()
     pg.quit()
     sys.exit()
+if __name__ == "__main__":
+    run()

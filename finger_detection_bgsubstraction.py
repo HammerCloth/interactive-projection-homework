@@ -3,6 +3,12 @@ import numpy as np
 import copy
 import math
 import pyautogui
+import threading
+import turret_mouse
+
+t=threading.Thread(target=turret_mouse.run())
+t.start()
+
 
 #获取屏幕大小
 screenWidth, screenHeight = pyautogui.size()
@@ -108,7 +114,7 @@ while camera.isOpened():
         length = len(contours)
         maxArea = -1
         if length > 0:
-            for i in range(length):  # find the biggest contour (according to area)
+            for i in range(length):  
                 temp = contours[i]
                 area = cv2.contourArea(temp)
                 if area > maxArea:
