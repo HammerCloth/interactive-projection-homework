@@ -3,11 +3,11 @@ import numpy as np
 import copy
 import math
 import pyautogui
-import threading
+import _thread
 import turret_mouse
 
-t=threading.Thread(target=turret_mouse.run())
-t.start()
+#新建线程用来运行游戏
+_thread.start_new_thread(turret_mouse.run,())
 
 
 #获取屏幕大小
@@ -142,6 +142,9 @@ while camera.isOpened():
                     print(x,y)
                     #if x>screenWidth/2-250 and x<screenHeight/2+250:
                     pyautogui.moveTo(x,y)
+                    if cnt>2:
+                        pyautogui.click()
+
         cv2.imshow('output', drawing)
 
     # Keyboard OP
@@ -154,7 +157,7 @@ while camera.isOpened():
         #建立一个提取背景帧的模型
         bgModel = cv2.createBackgroundSubtractorMOG2(0, bgSubThreshold)
         isBgCaptured = 1
-        print( '背景已提取'')
+        print( '背景已提取')
     elif k == ord('r'):  # press 'r' to reset the background
         bgModel = None
         triggerSwitch = False

@@ -6,18 +6,18 @@ import pygame as pg
 TURRET=None
 CAPTION = "Tank Turret: Mouse"
 SCREEN_SIZE = (500, 500)
+#背景颜色用于提取图片中的物件
 BACKGROUND_COLOR = (50, 50, 50)
 COLOR_KEY = (255, 0, 255)
 
 #炮塔类
 class Turret(object):
-    """Mouse guided lasers."""
 
     def __init__(self, location):
-        """Location is an (x,y) coordinate pair."""
         self.original_barrel = TURRET.subsurface((0, 0, 150, 150))
         self.barrel = self.original_barrel.copy()
         self.base = TURRET.subsurface((300, 0, 150, 150))
+        #pygame使用矩形控制物件的位置
         self.rect = self.barrel.get_rect(center=location)
         self.base_rect = self.rect.copy()
         self.angle = self.get_angle(pg.mouse.get_pos())
@@ -26,6 +26,7 @@ class Turret(object):
     def get_angle(self, mouse):
         offset = (mouse[1]-self.rect.centery, mouse[0]-self.rect.centerx)
         self.angle = 135-math.degrees(math.atan2(*offset))
+        #旋转炮管
         self.barrel = pg.transform.rotate(self.original_barrel, self.angle)
         self.rect = self.barrel.get_rect(center=self.rect.center)
     #获取事件（鼠标左键或者鼠标移动）
@@ -35,24 +36,17 @@ class Turret(object):
         elif event.type == pg.MOUSEMOTION:
             self.get_angle(event.pos)
 
+    #在表面上画出炮架和炮管
     def draw(self, surface):
-        """Draw base and barrel to the target surface."""
         surface.blit(self.base, self.base_rect)
         surface.blit(self.barrel, self.rect)
 
-
+#激光类，继承于pygame.sprite.Sprite
 class Laser(pg.sprite.Sprite):
-    """
-    A class for our laser projectiles. Using the pygame.sprite.Sprite class
-    this time, though it is just as easily done without it.
-    """
-
+    #通过坐标和角度进行初始化
     def __init__(self, location, angle):
-        """
-        Takes a coordinate pair, and an angle in degrees. These are passed
-        in by the Turret class when the projectile is created.
-        """
         pg.sprite.Sprite.__init__(self)
+        #通过坐标截取出图片中的炮弹
         self.original_laser = TURRET.subsurface((150, 0, 150, 150))
         self.angle = -math.radians(angle-135)
         self.image = pg.transform.rotate(self.original_laser, angle)
@@ -64,40 +58,34 @@ class Laser(pg.sprite.Sprite):
         self.done = False
 
     def update(self, screen_rect):
-        """
-        Because pygame.Rect's can only hold ints, it is necessary to hold
-        the real value of our movement vector in another variable.
-        """
         self.move[0] += self.speed[0]
         self.move[1] += self.speed[1]
         self.rect.topleft = self.move
         self.remove(screen_rect)
 
     def remove(self, screen_rect):
-        """If the projectile has left the screen, remove it from any Groups."""
+        #如果炮弹移出屏幕，将其从任何group中删除
         if not self.rect.colliderect(screen_rect):
             self.kill()
 
 
 class Control(object):
-    """Why so controlling?"""
 
     def __init__(self):
-        """
-        Prepare necessities; create a Turret; and create a Group for our
-        laser projectiles.
-        """
+
         self.screen = pg.display.get_surface()
         self.screen_rect = self.screen.get_rect()
         self.done = False
         self.clock = pg.time.Clock()
         self.fps = 60.0
         self.keys = pg.key.get_pressed()
+        #初始化一个炮台
         self.cannon = Turret((250, 250))
+        #初始化一个列表用来存储所有炮弹
         self.objects = pg.sprite.Group()
 
     def event_loop(self):
-        """Events are passed on to the Turret."""
+        #将从鼠标获得的事件event传递给cannon
         for event in pg.event.get():
             self.keys = pg.key.get_pressed()
             if event.type == pg.QUIT or self.keys[pg.K_ESCAPE]:
@@ -105,22 +93,22 @@ class Control(object):
             self.cannon.get_event(event, self.objects)
 
     def update(self):
-        """Update all lasers."""
+        #更新所有炮弹的状态
         self.objects.update(self.screen_rect)
 
     def draw(self):
-        """Draw all elements to the display surface."""
+        #在surface上画出炮台和所有炮弹
         self.screen.fill(BACKGROUND_COLOR)
         self.cannon.draw(self.screen)
         self.objects.draw(self.screen)
 
     def display_fps(self):
-        """Show the program's FPS in the window handle."""
+        #显示fps
         caption = "{} - FPS: {:.2f}".format(CAPTION, self.clock.get_fps())
         pg.display.set_caption(caption)
 
     def main_loop(self):
-        """"Same old story."""
+        #主循环 same old story
         while not self.done:
             self.event_loop()
             self.update()
@@ -142,5 +130,7 @@ def run():
     run_it.main_loop()
     pg.quit()
     sys.exit()
+
+
 if __name__ == "__main__":
     run()
